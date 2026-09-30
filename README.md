@@ -83,8 +83,9 @@ Each case folder in `examples/` contains:
 | File | Purpose |
 | ---- | ------- |
 | `*.atp` | ATP input deck. It declares `MODEL ... FOREIGN YALUK_DLL_MODEL` and one YALUK instance per line section. |
-| `yaluk.ini` | Simulation settings: config folder, number of lightning events, maximum lines and conductors. |
-| `yaluk_status.ini` | Flags for printing the EM field and process info, reading the field from an external file, and using a non-constant line profile. |
+| `yaluk.ini` | Main YALUK settings (see below). |
+| `yaluk_status.ini` | Output and option flags (see below). |
+| `CaseFiles/` | Line geometry (`linea_NNN.txt`), lightning current (`corr_NNNNN.txt`) and miscellaneous parameters (`Miscelaneo.txt`). |
 | `*.csv` | Lightning database (strike parameters for each event). |
 | `*.pch` | ATP punch files, such as surge-arrester models. |
 
@@ -95,7 +96,45 @@ cd examples/SingleLine
 /path/to/tpbig BOTH test.atp s -r
 ```
 
-The `run.sh` scripts in the example folders show the full sequence (build, `vardim`, copy `startup`, run), but they use the paths of an older Vagrant setup (`/vagrant/...`); adjust them to your directories before using them.
+YALUK reads both `.ini` files from the directory where `tpbig` runs. Only the first value on each line is read; the text after it (usually starting with `%`) is a comment, so keep the lines in this order.
+
+### yaluk.ini
+
+```text
+CaseFiles % Folder with Config_files
+1         % Number of lightning to simulate
+5         % Maximum number of lines
+1         % Maximum number of conductors
+```
+
+| Line | Meaning |
+| ---- | ------- |
+| 1 | Folder, relative to the case directory, that holds the line and lightning files. If it does not exist, YALUK creates it and asks you to put the files there. |
+| 2 | Lightning case number. It selects the current file `corr_NNNNN.txt` (zero-padded to five digits, so `1` reads `corr_00001.txt`). |
+| 3 | Number of line sections. YALUK reads `linea_001.txt` up to `linea_NNN.txt`, so it must match the number of YALUK instances in the `.atp` file. |
+| 4 | Maximum number of conductors per line. Values above 8 are limited to 8, and 0 is replaced by 4 with a warning. |
+
+If `yaluk.ini` is missing, YALUK prints the path it tried and asks for the name of the configuration file on the console.
+
+### yaluk_status.ini
+
+```text
+.False.  % Imprimir_campo  Print the electromagnetic field
+.False.  % Imprimir_inf    Print process information
+.False.  % Read_campo      Read the electromagnetic field from an external file
+.False.  % status_perfil   Use a non-constant line profile
+```
+
+Each line is a Fortran logical (`.True.` or `.False.`):
+
+| Flag | When `.True.` |
+| ---- | ------------- |
+| `Imprimir_campo` | Writes the computed electromagnetic field of each line section to `campoNNN.txt`. |
+| `Imprimir_inf` | Prints extra information about the process to the console. |
+| `Read_campo` | Reserved for reading the electromagnetic field from an external file. The current code reads this flag but does not use it yet. |
+| `status_perfil` | Uses a line profile that is not constant along the line (varying conductor heights). |
+
+The last two lines are optional. If `yaluk_status.ini` is missing, all flags are `.False.`.
 
 ## License
 

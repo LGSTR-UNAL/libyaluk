@@ -1,0 +1,11 @@
+2.00E8 % Velocidad de la Descarga de retorno(m / s)....................v
+2.00E3 % Constante de Atenuación para MTLE si es = 0 usa modelo TL(m).zlam
+8.00E3 % Altura de la Nube(m)......................................Hcan
+20e-6 % Tiempo de cálculo primera ventana(s)......................tmax1 (Obsolete)
+40 % Numero de Divisiones segunda ventana.......................SIZE2 (Obsolete)
+1 % Tener en Cuenta Conductividad  1(Si) 0(No)...............Conductividad
+1.00E-3 % Conductividad del terreno o(s / m)..........................o
+1.00E1 % Permitividad del terreno e [p.u]..........................o
+2.00E1 % Espaciamiento en distancia dx(s / m)..........................o
+0 % Onda triangular o(s / m)..........................o
+5000 % !Maximum distance for calculating EM Fields [m]..........................o
