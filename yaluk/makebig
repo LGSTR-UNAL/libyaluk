@@ -1,0 +1,92 @@
+# File: makefile
+# Purpose: compile and link atp
+# 
+# Change this line (and directories if necessary)
+# Change paramet.inc, if necessary
+#
+SYSTEM = LINUX
+# Directory of this makefile, so it works regardless of where make is invoked from
+HERE := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+# Directory with the ATP sources, includes and libraries (one level up)
+ATPDIR ?= $(abspath $(HERE)/../libatp)
+
+INCFLAGS = -Inodaline -I$(ATPDIR)
+CC = gcc
+FOR = gfortran
+#
+# OBJECTS is a customized list of modules that are being worked on
+# and are present in the current directory
+
+OBJECTS = dimdef.o \
+	      newmods.o \
+	      comtac.o \
+	      cfun.o \
+	      crandom.o \
+	      cmodel.o \
+	      fgnmod.o \
+	      usrfun.o \
+	      analyt.o \
+	      usernl.o \
+	      devt69.o \
+	      userline.o \
+	      nlelem.o \
+	      user10.o \
+	      user96.o \
+	      hopcod.o
+# ------------------------
+
+CFLAGS = -O2
+FFLAGS = -Ofast -I$(ATPDIR)
+
+
+IMAGE = $(HERE)/tpbig
+LIBRARY = $(HERE)/libyaluk.a $(ATPDIR)/tpbig.a $(ATPDIR)/dislin.a
+
+# Sources are taken from ATPDIR; the .o files and tpbig go next to this makefile
+OBJECTS := $(addprefix $(HERE)/,$(OBJECTS))
+
+# The first rule is the one "make -f makebig" runs: it must be tpbig
+$(IMAGE) : $(OBJECTS) $(LIBRARY)
+	$(FOR) -o $@ $(OBJECTS) -fopenmp $(LIBRARY)
+$(HERE)/%.o: $(ATPDIR)/%.f
+	$(FOR) -c $(FFLAGS) $< -o $@
+$(HERE)/%.o: $(ATPDIR)/%.c
+	$(CC) -c $(CFLAGS) $(INCFLAGS) $< -o $@
+# The .o files are intermediate: make deletes them after linking tpbig and does
+# not rebuild them while tpbig is up to date with the ATPDIR sources
+.INTERMEDIATE: $(OBJECTS)
+# libyaluk.a is built by its own makefile; FORCE makes it always get invoked,
+# and the sub-make only recompiles if some yaluk .f file changed
+$(HERE)/libyaluk.a: FORCE
+	$(MAKE) -C $(HERE) -f makefile
+FORCE:
+
+.PHONY: clean FORCE
+clean:
+	rm -f $(OBJECTS) $(IMAGE)
+#
+# make available the following objects:
+#
+# /usr/lib/i386-linux-gnu/crt1.o 
+# /usr/lib/i386-linux-gnu/crti.o
+#
+# This is the dependancy relationship for powerflow which
+# specifies the link and causes the use of the utility compile 
+# procedures below.
+# WARNING: 
+# The <tab> as the first character signifies the action to
+# take for a given dependancy.
+# The back slash causes a continuation of the current line 
+# even if the line is commented out. 
+# The following are the compile procedures for any source code specified
+# in the dependancy.  These override the system defaults.
+# the first procedure is for any fortran code (appendix .f creating .o)
+# the second is for an C code (appendix .c creating .o)
+
+#INCFLAGS = -Inodaline 
+
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.GS) $<
+#
+#
+# end of makefile
